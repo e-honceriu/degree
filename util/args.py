@@ -6,4 +6,5 @@ def parse_args():
     parser.add_argument("--height", type=int, default=540)
     parser.add_argument("--fps", type=int, default=30)
     parser.add_argument("--save", type=bool, default=False)
+    parser.add_argument("--lookup", type=bool, default=True)
     return parser.parse_args()

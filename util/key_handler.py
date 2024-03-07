@@ -8,7 +8,7 @@ CURRENT_MODE = NOOP
 
 def get_operation():
     global CURRENT_MODE
-    key = cv.waitKey(20)
+    key = cv.waitKey(10)
     if key == -1:
         if CURRENT_MODE == SAVE:
             CURRENT_MODE = NOOP
