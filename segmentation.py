@@ -8,6 +8,8 @@ error_weights = np.array([0.298936021293775390, 0.587043074451121360, 0.14020904
 lookup_table_path = './data/lookup_table.json'
 lookup_table = []
 
+kernel = np.ones((5, 5), np.uint8)
+
 def is_skin_pixel(b, g, r):
     error_value = (b / 255.0) * error_weights[0] + (g / 255.0) * error_weights[1] + (r / 255.0) * error_weights[2] - max((b / 255.0), (g / 255.0))
     if (error_value >= 0.02511 and error_value <= 0.1177):
@@ -50,4 +52,15 @@ def get_skin_mask(bgr_frame, use_lookup=True):
 
 def segment_skin(bgr_frame, use_lookup=True):
     skin_mask = get_skin_mask(bgr_frame, use_lookup)
-    return skin_mask
+    skin_mask = cv.morphologyEx(skin_mask, cv.MORPH_CLOSE, kernel)
+    skin_mask = cv.dilate(skin_mask, kernel, iterations=1)
+    contours = get_contours(skin_mask)
+    skin_mask = np.zeros(skin_mask.shape)
+    rois = []
+    for contour in contours:
+        x, y, w, h = cv.boundingRect(contour)
+        roi = bgr_frame[y:y+h, x:x+w].copy()
+        rois.append(roi)
+        cv.drawContours(skin_mask, [contour], -1, 255, -1)
+    skin_mask = cv.morphologyEx(skin_mask, cv.MORPH_CLOSE, kernel)
+    return skin_mask, rois

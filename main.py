@@ -15,11 +15,17 @@ if __name__ == "__main__":
     cvFpsCalc = CvFpsCalc(buffer_len=10)
     segmentation.compute_lookup_table()
     camera.start_camera(frame_size=(args.width, args.height), fps=args.fps)
-    cv.namedWindow("Input")
+    lookup = args.lookup
     while True:
         print(f"FPS: {cvFpsCalc.get()}")
         op = key_handler.get_operation()
         if op == key_handler.EXIT:
             exit()
+        if op == key_handler.CHANGE_LOOKUP:
+            lookup = not lookup
         im = camera.get_frame()
-        skin = segmentation.get_skin_mask(im, args.lookup)
+        skin, rois = segmentation.segment_skin(im, lookup)
+        if args.display:
+            cv.imshow("Skin", skin)
+        if op == key_handler.SAVE:
+            image_saver.save_image(im, skin, rois)
